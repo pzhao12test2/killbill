@@ -7,6 +7,8 @@ before_install:
   0 || true
 - echo "<settings><profiles><profile><repositories><repository><id>central</id><name>bintray</name><url>http://jcenter.bintray.com</url></repository></repositories><id>bintray</id></profile></profiles><activeProfiles><activeProfile>bintray</activeProfile></activeProfiles></settings>"
   > /var/tmp/settings.xml
+- "function keep_alive() {\n  while true; do\n    echo -en \"\\a\"\n    sleep 5\n\
+  \  done\n}\nkeep_alive &\n"
 before_script:
 - jdk_switcher use $JDK
 - if [ "$TRAVIS_OS_NAME" == "osx" ];    then sed -i '' 's/<gib.enabled>false/<gib.enabled>true/'
@@ -16,7 +18,7 @@ cache:
   directories:
   - $HOME/.m2
 dist: trusty
-install: travis_wait mvn -q -U install -DskipTests=true --settings /var/tmp/settings.xml
+install: mvn -q -U install -DskipTests=true --settings /var/tmp/settings.xml
 language: java
 matrix:
   fast_finish: true
@@ -27,7 +29,7 @@ matrix:
 script:
 - touch NOW
 - echo GIBSTUDYSTART $(date)
-- travis_wait 30 mvn -q -Djava.security.egd=file:/dev/./urandom -Dorg.slf4j.simpleLogger.defaultLogLevel=WARN
+- mvn -q -Djava.security.egd=file:/dev/./urandom -Dorg.slf4j.simpleLogger.defaultLogLevel=WARN
   -Dorg.slf4j.simpleLogger.log.org.killbill.billing.util.cache=ERROR -Dorg.slf4j.simpleLogger.log.org.killbill.billing.lifecycle=ERROR
   -Dlogback.configurationFile=$PWD/profiles/killbill/src/test/resources/logback.travis.xml
   clean install $PHASE -pl '!beatrix,!profiles,!profiles/killbill,!profiles/killpay'
